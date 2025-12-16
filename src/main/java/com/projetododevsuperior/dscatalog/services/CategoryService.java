@@ -5,12 +5,16 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.projetododevsuperior.dscatalog.dto.CategoryDTO;
 import com.projetododevsuperior.dscatalog.entities.Category;
 import com.projetododevsuperior.dscatalog.repositories.CategoryRepository;
+import com.projetododevsuperior.dscatalog.resources.CategoryResource;
+import com.projetododevsuperior.dscatalog.services.exceptions.DatabaseException;
 import com.projetododevsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -18,6 +22,15 @@ import jakarta.persistence.EntityNotFoundException;
 @Service
 public class CategoryService {
 
+	// Comentado pois causou erro de chamada ciclica.
+	
+//    private final CategoryResource categoryResource;
+
+//
+//    CategoryService(CategoryResource categoryResource) {
+//        this.categoryResource = categoryResource;
+//    }
+	
 	@Autowired
 	private CategoryRepository _repository;
 	
@@ -56,6 +69,20 @@ public class CategoryService {
 		catch(EntityNotFoundException e) {
 			throw new ResourceNotFoundException("Id not found " + id);
 		}	
+	}
+
+	public void delete(Long id) {
+		try {
+			_repository.deleteById(id);
+			
+		}
+		catch (EmptyResultDataAccessException e) {
+			throw new ResourceNotFoundException("Id not found " + id);
+		}
+		catch(DataIntegrityViolationException e) {
+			throw new DatabaseException("Integrity violation");
+		}
+				
 	}
 	
 }
