@@ -7,13 +7,14 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.projetododevsuperior.dscatalog.dto.CategoryDTO;
 import com.projetododevsuperior.dscatalog.entities.Category;
 import com.projetododevsuperior.dscatalog.repositories.CategoryRepository;
-import com.projetododevsuperior.dscatalog.resources.CategoryResource;
 import com.projetododevsuperior.dscatalog.services.exceptions.DatabaseException;
 import com.projetododevsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
 
@@ -37,12 +38,21 @@ public class CategoryService {
 	@Transactional(readOnly = true) /* Transação com BD */
 	// Isso, alinhado com o open-in-view=false, fazem com que as consultas do BD
 	// estejam isoladas na camada de serviço. O Controlador apenas entrega a resposta.
-	public List<CategoryDTO> findAll(){
-		List<Category> list = _repository.findAll();
-		
-		return list.stream().map(x -> new CategoryDTO(x)).collect(Collectors.toList());
-	}
+	
+	
+	// Versão sem paginação
+//	public List<CategoryDTO> findAll(){
+//		List<Category> list = _repository.findAll();
+//		
+//		return list.stream().map(x -> new CategoryDTO(x)).collect(Collectors.toList());
+//	}
 
+	public Page<CategoryDTO> findAllPaged(PageRequest pageRequest){
+		Page<Category> list = _repository.findAll(pageRequest);
+		
+		return list.map(x -> new CategoryDTO(x));
+	}
+	
 	@Transactional(readOnly = true) 
 	public CategoryDTO findById(Long id) {
 		Optional<Category> obj = _repository.findById(id);
